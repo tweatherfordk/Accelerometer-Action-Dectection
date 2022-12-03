@@ -1,19 +1,16 @@
 # Accelerometer-Action-Dectection
 
 ## Overview
-
-This project uses data from accelerometers and gyroscopes to correctly detect what activity 
-In nearly every smartphone or smart watch, you can find either an accelerometer or a gyroscope that is used to collect health data. They are how a Fitbit or Apple’s health app track your steps and other met.
+In nearly every smartphone or smart watch, you can find either an accelerometer or a gyroscope that is used to collect health data. They are how a Fitbit or Apple’s health app track your steps and other met. Using data from accelerometers and gyroscopes from those devices, this project creates a model to detect what activity someone is doing at a point in time. Two different model architectures were employed, one to classify a type sereis as its correct class, one to predict changes in action along a single time series.
 
 ## Business Understanding
-This project addresses the growing use of electronic means of tracking exercise.
+This project addresses the growing use of electronic means of tracking exercise. It uses a multifeature approach to detect different human activities in time series data. This type of model is crucial to the growing field of exercise tracking widely used today by our smart devices to accurately log time spent doing different exercises and tasks.
 
 ## Data Understanding
 
 The data is from a the WISDM (Wireless Sensor Data Mining) Lab at Fordham University and is collected from accelerometers and gyroscope sensors from a smartphones and a smartwatch equipped with both. There were 51 participants, which each participant performing 18 different activities for roughly 3 minutes each for a total of 54 minutes of data per participant. Each participant’s data was stored in .txt files, one for each sensor per device. Each device captures a numeric reading in the X, Y, and Z planes. Accelerometers measure acceleration, while gyroscopes measure angular velocity.
 
 ![Axes-Sensitivity-Orientation](https://user-images.githubusercontent.com/110851861/205399223-45b1cd6f-6cd8-4a0f-9d16-6017df8c188f.jpg)
-
 
 Activities included both hand-oriented activities (typing) and non-hand-oriented activities (jogging ) from a diverse selection of actions. The accelerometers and gyroscopes were programmed to sample at a rate of 20Hz (20 readings per second), but upon looking at the data, there is much inconsistency in the individual sampling rates among the four sensors.
 
@@ -24,7 +21,7 @@ To address these inconsistencies, I looked at the Unix timestamps at which numbe
 At this point, as the project used two different model architectures, data preparation was split.
 
 ### Time Series Classification Model
-The aim of this model is to predict which activity a time series demonstrates, one time series per action. Each participant’s data was subdivided into a separate time series for each distinct activity they performed, and then these were zero padded to the length of the max sequence, leading to a total of 907 unique sequences.
+The aim of this model is to predict which activity a time series demonstrates, one time series per action. Each participant’s data was subdivided into a separate time series for each distinct activity they performed, and then these were zero padded to the length of the max sequence, leading to a total of 907 unique sequences. Softmax functions were used in the final dense layer of each model because this is a classification problem.
 
 
 ### State Prediction Model
@@ -34,9 +31,28 @@ After standardizing the length among each participant with zero padding, I divid
 For both models, activity labels were One Hot Encoded, though the first model has one matrix for each sequence, while the second model has a matrix for each timestamp.
 
 ## Modeling
-LSTM (Long Short Term Memory) models were used for both tasks, in slightly different forms. 
+LSTM (Long Short Term Memory) models were used for both tasks, in slightly different forms. LSTM layers work by using forget gates to determine which information is relevant and forgetting the nonessential information, and then learns from these determinations by updating the cell state. Categorical crossentropy loss functions were used because this is a multiclass classification problem.
 
+### Classification Model
+Data was train and test split, then scaled using Standard Scaler fit to the training set. A baseline Sequential model was created with a LSTM layer into a dense layer, and then a more robust model using more LSTM layers was created. Below is the final model architecture. The basic layers
+0.0728
+
+Final Classification Model Architecture:
+![model2_plot_class](https://user-images.githubusercontent.com/110851861/205419320-6a1b8b1e-86de-485b-be00-268d53be536e.png)
+
+![class_model_history_accuracy](https://user-images.githubusercontent.com/110851861/205419436-0e8de56f-b60c-4227-9737-4dfffa6a8d4d.png)
+
+### State Prediction Model
+The data preparation followed the same workflow as in the classification model, but this model was state prediction at each point in time, rather than on an entire time series. Both a basic LSTM and a more robust LSTM model were created.
+
+Final State Prediction Model Architecture:
+![model2_plot_seq](https://user-images.githubusercontent.com/110851861/205419345-b9126e3e-45a7-4f13-af01-544d98dd4d6d.png)
+
+![model_history_accuracy](https://user-images.githubusercontent.com/110851861/205419438-71bf14b0-1bfe-4e6a-bdcf-02279b91ff03.png)
+
+## Conclusions
+Overall, the models performed significantly less well than expected. My hypothesis is that the data lost too much granularity when it was downsampled and average to fractions of second in order to address the inconsistencies of the sampling rates. 
 
 ## Further Work
-Look into resampling data in a different way
+In order to improve results, next steps include either resmapling the WISDM dataset choosing a sampling rate to standardize lenght instead of an aggregation method OR testing the model with different accelerometer and/or gyroscope data.
 
