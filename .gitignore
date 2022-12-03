@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 wisdm-dataset/
 *.pkl
+*.png
